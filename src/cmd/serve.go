@@ -1,0 +1,95 @@
+package cmd
+
+import (
+	"fmt"
+	"log"
+	"net"
+	"time"
+
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	ratelimit "github.com/grpc-ecosystem/go-grpc-middleware/ratelimit"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"github.com/oojob/company/src/api"
+	"github.com/oojob/company/src/app"
+	company "github.com/oojob/protorepo-company-go"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
+
+	"github.com/spf13/cobra"
+)
+
+// alwaysPassLimiter is an example limiter which implements Limiter interface.
+// It does not limit any request because Limit function always returns false.
+type alwaysPassLimiter struct{}
+
+func (*alwaysPassLimiter) Limit() bool {
+	return false
+}
+
+func listenGRPC(api *api.CompanyAPI, port int) error {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		return err
+	}
+
+	recoveryFunc := func(p interface{}) (err error) {
+		return status.Errorf(codes.Unknown, "panic triggered: %v", p)
+	}
+	recoveryOpts := []grpc_recovery.Option{
+		grpc_recovery.WithRecoveryHandler(recoveryFunc),
+	}
+
+	// Create unary/stream rateLimiters, based on token bucket here.
+	limiter := &alwaysPassLimiter{}
+
+	grpcServer := grpc.NewServer(
+		grpc.ConnectionTimeout(time.Minute*30),
+		grpc.MaxRecvMsgSize(1024*1024*128),
+		grpc_middleware.WithUnaryServerChain(
+			ratelimit.UnaryServerInterceptor(limiter),
+			grpc_recovery.UnaryServerInterceptor(recoveryOpts...),
+		),
+		grpc_middleware.WithStreamServerChain(
+			ratelimit.StreamServerInterceptor(limiter),
+			grpc_recovery.StreamServerInterceptor(recoveryOpts...),
+		),
+	)
+
+	company.RegisterCompanyServer(grpcServer, &api.CompanyServer)
+	reflection.Register(grpcServer)
+
+	log.Printf("starting HTTP/2 gRPC API server: %q\n", lis.Addr().String())
+
+	return grpcServer.Serve(lis)
+}
+
+var serveCmd = &cobra.Command{
+	Use:   "serve",
+	Short: "serves the gRPC server",
+	Long:  `start the gRPC server on provided port`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		a, err := app.New()
+		if err != nil {
+			return err
+		}
+
+		api, err := api.New(a)
+		if err != nil {
+			return err
+		}
+
+		port := api.Config.Port
+
+		if err := listenGRPC(api, port); err != nil {
+			log.Fatalf("Failed to serve: %v\n", err)
+		}
+
+		return nil
+	},
+}
+
+func init() {
+	RootCmd.AddCommand(serveCmd)
+}
