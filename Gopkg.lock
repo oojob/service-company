@@ -211,7 +211,7 @@
   revision = "f447254575fde2c994d6f2d03076c476bfe61854"
 
 [[projects]]
-  digest = "1:7543f50ecb108b5bf1220a8452d35e3fd9cb2831d3fb67f42e2647ffb9501328"
+  digest = "1:6f8247c9e17a66a2ece1e95161e521d5de9e7b5b5ffc4ca449da8c6ad3e448b9"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -226,6 +226,7 @@
     "credentials",
     "credentials/internal",
     "encoding",
+    "encoding/gzip",
     "encoding/proto",
     "grpclog",
     "internal",
@@ -287,6 +288,7 @@
     "github.com/spf13/viper",
     "google.golang.org/grpc",
     "google.golang.org/grpc/codes",
+    "google.golang.org/grpc/encoding/gzip",
     "google.golang.org/grpc/reflection",
     "google.golang.org/grpc/status",
   ]
