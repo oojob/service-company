@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: account-svc
+  name: account-deployment
+  namespace: oojob
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: account-svc
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: account-svc
+    spec:
+      containers:
+      - env:
+        - name: DATABASEURI
+          value: host=salt.db.elephantsql.com user=pvhdolsp dbname=pvhdolsp password=WPSXt41F15pPgpTx-0V7CC6Ec5ALoyvL
+            sslmode=disable
+        - name: PORT
+          value: "3005"
+        image: oojob/company:dev
+        imagePullPolicy: Never
+        name: account-svc
+        ports:
+        - containerPort: 3005
+          name: grpc
+        resources:
+          requests:
+            cpu: 100m
+      serviceAccountName: acccount-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: account-svc
+  name: account-svc
+  namespace: dododuck
+spec:
+  type: LoadBalancer
+  selector:
+    app: account-svc
+  clusterIP: None
+  ports:
+    - port: 3005
+      targetPort: 3005
+      name: grpc
+---

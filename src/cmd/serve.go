@@ -74,7 +74,7 @@ func listenGRPC(api *api.API, port int) error {
 		),
 	)
 
-	company.RegisterCompanyServer(grpcServer, api)
+	company.RegisterCompanyServiceServer(grpcServer, api)
 	reflection.Register(grpcServer)
 
 	logrus.Infof("starting HTTP/2 gRPC API server: %q\n", lis.Addr().String())
