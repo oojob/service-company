@@ -2,7 +2,7 @@
 # inspiration: https://github.com/ShelterTechSF/askdarcel-web/blob/master/tools/docker-build.sh
 set -ex
 
-REPO="nirajgeorgian/job"
+REPO="docker.pkg.github.com/oojob/service-company/company"
 
 COMMIT=$CODEBUILD_RESOLVED_SOURCE_VERSION
 if [[ -z "$COMMIT" ]]; then
@@ -10,16 +10,16 @@ if [[ -z "$COMMIT" ]]; then
 fi
 COMMIT=${COMMIT::8}
 
-DOCKER_HOST="https://hub.docker.com/r/nirajgeorgian/job"
+DOCKER_HOST="docker.pkg.github.com"
 
 if [[ "$ACCOUNT_SVC_PROFILE" == "development" ]]; then
-  TAG="development"
+  TAG="dev"
 elif [[ "$ACCOUNT_SVC_PROFILE" == "testing" ]]; then
-  TAG="testing"
+  TAG="test"
 elif [[ "$ACCOUNT_SVC_PROFILE" == "production" ]]; then
-  TAG="production"
+  TAG="prod"
 elif [[ "$ACCOUNT_SVC_PROFILE" == "staging" ]]; then
-  TAG="staging"
+  TAG="stag"
 fi
 
 echo $TAG
@@ -28,7 +28,7 @@ echo $COMMIT
 echo "Creating version.json..."
 echo "{
   \"commit\": \"$COMMIT\",
-  \"image\": \"$TAG\",
+  \"image\": \"$TAG\"
 }" > ./scripts/version.json
 
 echo "Building docker image..."

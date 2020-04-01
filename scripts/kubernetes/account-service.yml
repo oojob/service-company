@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: job
-  namespace: dododuck
+  name: account-deployment
+  namespace: oojob
   labels:
-    app: job-svc
+    app: account-svc
   creationTimestamp: null
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: job-svc
+      app: account-svc
   strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: job-svc
+        app: account-svc
     spec:
-      serviceAccountName: job
+      serviceAccountName: acccount-service
       containers:
-        - name: job-svc
-          image: nirajgeorgian/job:development
-          imagePullPolicy: "Always"
+        - name: account-svc
+          image: oojob/company:dev
+          imagePullPolicy: "Never"
           resources:
             requests:
               cpu: 100m
@@ -39,11 +39,14 @@ status: {}
 apiVersion: v1
 kind: Service
 metadata:
-  name: job-svc
+  labels:
+    app: account-svc
+  name: account-svc
   namespace: dododuck
 spec:
+  type: LoadBalancer
   selector:
-    app: job-svc
+    app: account-svc
   clusterIP: None
   ports:
     - port: 3005
