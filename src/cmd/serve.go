@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"time"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/oojob/company/src/api"
 	"github.com/oojob/company/src/app"
 	company "github.com/oojob/protorepo-company-go"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	_ "google.golang.org/grpc/encoding/gzip" // Install the gzip compressor
@@ -30,7 +30,7 @@ func (*alwaysPassLimiter) Limit() bool {
 	return false
 }
 
-func listenGRPC(api *api.CompanyAPI, port int) error {
+func listenGRPC(api *api.API, port int) error {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		return err
@@ -74,10 +74,10 @@ func listenGRPC(api *api.CompanyAPI, port int) error {
 		),
 	)
 
-	company.RegisterCompanyServer(grpcServer, &api.CompanyServer)
+	company.RegisterCompanyServer(grpcServer, api)
 	reflection.Register(grpcServer)
 
-	log.Printf("starting HTTP/2 gRPC API server: %q\n", lis.Addr().String())
+	logrus.Infof("starting HTTP/2 gRPC API server: %q\n", lis.Addr().String())
 
 	return grpcServer.Serve(lis)
 }
@@ -91,6 +91,7 @@ var serveCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		defer a.Close()
 
 		api, err := api.New(a)
 		if err != nil {
@@ -100,7 +101,7 @@ var serveCmd = &cobra.Command{
 		port := api.Config.Port
 
 		if err := listenGRPC(api, port); err != nil {
-			log.Fatalf("Failed to serve: %v\n", err)
+			logrus.Error("Failed to serve: %v\n", err)
 		}
 
 		return nil

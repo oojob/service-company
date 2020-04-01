@@ -4,27 +4,20 @@ import (
 	"github.com/oojob/company/src/app"
 )
 
-// CompanyServer base server struct
-type CompanyServer struct{}
-
-// CompanyAPI api base struct
-type CompanyAPI struct {
-	App           *app.App
-	Config        *Config
-	CompanyServer CompanyServer
+// API api base struct
+type API struct {
+	App    *app.App
+	Config *Config
 }
 
 // New new api instance
-func New(a *app.App) (api *CompanyAPI, err error) {
-	api = &CompanyAPI{App: a}
+func New(a *app.App) (api *API, err error) {
+	api = &API{App: a}
 
 	api.Config, err = InitConfig()
 	if err != nil {
 		return nil, err
 	}
-
-	companyServer := CompanyServer{}
-	api.CompanyServer = companyServer
 
 	return api, nil
 }
