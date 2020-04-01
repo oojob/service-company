@@ -2,7 +2,8 @@
 # inspiration: https://github.com/ShelterTechSF/askdarcel-web/blob/master/tools/docker-build.sh
 set -ex
 
-REPO="docker.pkg.github.com/oojob/service-company/company"
+SERVICE_NAME=company
+REPO="docker.pkg.github.com/oojob/service-$SERVICE_NAME/$SERVICE_NAME"
 
 COMMIT=$CODEBUILD_RESOLVED_SOURCE_VERSION
 if [[ -z "$COMMIT" ]]; then
@@ -45,3 +46,6 @@ echo "[
     \"imageUri\":\"$REPO:$TAG\"
   }
 ]" > ./scripts/imagedefinitions.json
+
+echo "generating linkerd proxies"
+cat scripts/kubernetes/$SERVICE_NAME-service.yml | linkerd inject  - > scripts/kubernetes/$SERVICE_NAME-linkerd.yml
