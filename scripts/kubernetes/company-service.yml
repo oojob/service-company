@@ -21,7 +21,7 @@ spec:
       serviceAccountName: acccount-service
       containers:
         - name: account-svc
-          image: oojob/company:dev
+          image: docker.pkg.github.com/oojob/service-company/company:dev
           imagePullPolicy: "Never"
           resources:
             requests:
@@ -31,7 +31,7 @@ spec:
               containerPort: 3005
           env:
             - name: DATABASEURI
-              value: "host=salt.db.elephantsql.com user=pvhdolsp dbname=pvhdolsp password=WPSXt41F15pPgpTx-0V7CC6Ec5ALoyvL sslmode=disable"
+              value: "mongodb+srv://oojob:oojobN9@oojob-fxap7.mongodb.net/oojob?retryWrites=true&w=majority"
             - name: PORT
               value: 3005
 status: {}
@@ -41,8 +41,8 @@ kind: Service
 metadata:
   labels:
     app: account-svc
-  name: account-svc
-  namespace: dododuck
+  name: account-service
+  namespace: oojob
 spec:
   type: LoadBalancer
   selector:
