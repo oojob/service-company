@@ -2,9 +2,10 @@ package db
 
 import (
 	"context"
-	"errors"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/oojob/company/src/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,20 +25,18 @@ func (db *Database) CreateCompany(in *model.Company) (string, error) {
 		return oid.Hex(), nil
 	}
 
-	return "", errors.New("invalid id")
+	return "", err
 }
 
 // ReadCompany create company entity
-func (db *Database) ReadCompany(in string) (*model.Company, error) {
+func (db *Database) ReadCompany(id *primitive.ObjectID) (*model.Company, error) {
 	companyCollection := db.Database("stayology").Collection("company")
 
-	id, err := primitive.ObjectIDFromHex(in)
-	if err != nil {
+	var company model.Company
+	result := companyCollection.FindOne(context.Background(), &bson.M{"_id": id})
+	if err := result.Decode(&company); err != nil {
 		return nil, err
 	}
-
-	var company model.Company
-	err = companyCollection.FindOne(context.Background(), model.Company{ID: id}).Decode(&company)
 
 	return &company, nil
 }
@@ -46,7 +45,7 @@ func (db *Database) ReadCompany(in string) (*model.Company, error) {
 func (db *Database) ReadCompanies() (*mongo.Cursor, error) {
 	companyCollection := db.Database("stayology").Collection("company")
 
-	cursor, err := companyCollection.Find(context.Background(), model.Company{})
+	cursor, err := companyCollection.Find(context.Background(), bson.M{})
 	if err != nil {
 		return nil, err
 	}
@@ -55,36 +54,30 @@ func (db *Database) ReadCompanies() (*mongo.Cursor, error) {
 }
 
 // UpdateCompany create company entity
-func (db *Database) UpdateCompany(in *model.Company) (string, error) {
+func (db *Database) UpdateCompany(id *primitive.ObjectID, in *bson.M) (string, error) {
 	companyCollection := db.Database("stayology").Collection("company")
 
-	result := companyCollection.FindOneAndUpdate(context.Background(), model.Company{ID: in.ID}, in, nil)
+	result := companyCollection.FindOneAndUpdate(context.Background(), bson.M{"_id": id}, bson.M{"$set": in}, options.FindOneAndUpdate().SetReturnDocument(1))
 
 	if result.Err() != nil {
 		return "", result.Err()
 	}
 
 	var doc model.Company
-	decodeErr := result.Decode(&doc)
-	if decodeErr != nil {
-		return "", decodeErr
+	if err := result.Decode(&doc); err != nil {
+		return "", err
 	}
 
 	return doc.ID.Hex(), nil
 }
 
 // DeleteCompany create company entity
-func (db *Database) DeleteCompany(in string) (string, error) {
+func (db *Database) DeleteCompany(id *primitive.ObjectID) (string, error) {
 	companyCollection := db.Database("stayology").Collection("company")
 
-	id, err := primitive.ObjectIDFromHex(in)
-	if err != nil {
-		return "", err
-	}
-
 	var company model.Company
-	err = companyCollection.FindOneAndDelete(context.Background(), model.Company{ID: id}).Decode(&company)
-	if err != nil {
+	result := companyCollection.FindOneAndDelete(context.Background(), bson.M{"_id": id})
+	if err := result.Decode(&company); err != nil {
 		return "", err
 	}
 

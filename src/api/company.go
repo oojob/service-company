@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
+
 	"github.com/golang/protobuf/ptypes"
 
 	"github.com/oojob/company/src/model"
@@ -40,7 +42,10 @@ func (c *API) CreateCompany(ctx context.Context, in *company.Company) (*company.
 	result, err := context.CreateCompany(&companyData)
 
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Invalid Document: %v", err),
+		)
 	}
 
 	return &company.Id{Id: result}, nil
@@ -49,10 +54,16 @@ func (c *API) CreateCompany(ctx context.Context, in *company.Company) (*company.
 // ReadCompany read company data
 func (c *API) ReadCompany(ctx context.Context, in *company.Id) (*company.Company, error) {
 	context := c.App.NewContext()
-	result, err := context.ReadCompany(in.GetId())
+
+	id, err := primitive.ObjectIDFromHex(in.GetId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("Could not convert to ObjectId: %v", err))
+	}
+
+	result, err := context.ReadCompany(&id)
 
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("Could not find blog with Object Id %s: %v", in.GetId(), err))
 	}
 
 	createdAt, err := ptypes.TimestampProto(result.CreatedAt)
@@ -70,7 +81,7 @@ func (c *API) ReadCompany(ctx context.Context, in *company.Id) (*company.Company
 		return nil, status.Errorf(codes.Unavailable, fmt.Sprintf("Could not decode data: %v", err))
 	}
 
-	return &company.Company{
+	companyResponse := &company.Company{
 		Id:           result.ID.Hex(),
 		Name:         result.Name,
 		Description:  result.Description,
@@ -88,7 +99,9 @@ func (c *API) ReadCompany(ctx context.Context, in *company.Id) (*company.Company
 		LastActive: lastActive,
 		CreatedAt:  createdAt,
 		UpdatedAt:  updatedAt,
-	}, nil
+	}
+
+	return companyResponse, nil
 }
 
 // ReadCompanies read all companies data
@@ -98,11 +111,12 @@ func (c *API) ReadCompanies(in *company.Empty, stream company.CompanyService_Rea
 
 	cursor, err := ctx.ReadCompanies()
 	if err != nil {
-		return err
+		return status.Errorf(codes.Internal, fmt.Sprintf("Unknown internal error: %v", err))
 	}
 	defer cursor.Close(context.Background())
 
 	for cursor.Next(context.Background()) {
+		// Decode the data at the current pointer and write it to data
 		err := cursor.Decode(result)
 		if err != nil {
 			return status.Errorf(codes.Unavailable, fmt.Sprintf("Could not decode data: %v", err))
@@ -157,30 +171,29 @@ func (c *API) ReadCompanies(in *company.Empty, stream company.CompanyService_Rea
 func (c *API) UpdateCompany(ctx context.Context, in *company.Company) (*company.Id, error) {
 	id, err := primitive.ObjectIDFromHex(in.GetId())
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("Could not convert the supplied blog id to a MongoDB ObjectId: %v", err))
 	}
 
-	companyData := model.Company{
-		ID:           id,
-		Name:         in.GetName(),
-		Description:  in.GetDescription(),
-		CreatedBy:    in.GetCreatedBy(),
-		URL:          in.GetUrl(),
-		Logo:         in.GetLogo(),
-		Location:     in.GetLocation(),
-		FoundedYear:  in.GetFoundedYear(),
-		HiringStatus: in.GetHiringStatus(),
-		NoOfEmployees: model.NoOfEmployees{
-			Min: in.GetNoOfEmployees().Min,
-			Max: in.GetNoOfEmployees().Max,
+	companyData := bson.M{
+		"name":         in.GetName(),
+		"description":  in.GetDescription(),
+		"created_by":   in.GetCreatedBy(),
+		"url":          in.GetUrl(),
+		"logo":         in.GetLogo(),
+		"location":     in.GetLocation(),
+		"founded_year": in.GetFoundedYear(),
+		"hiringstatus": in.GetHiringStatus(),
+		"no_of_employees": bson.M{
+			"min": in.NoOfEmployees.Min,
+			"max": in.NoOfEmployees.Max,
 		},
-		Skills:     in.GetSkills(),
-		LastActive: time.Now(),
-		UpdatedAt:  time.Now(),
+		"skills":      in.GetSkills(),
+		"last_active": time.Now(),
+		"updated_at":  time.Now(),
 	}
 
 	context := c.App.NewContext()
-	result, err := context.UpdateCompany(&companyData)
+	result, err := context.UpdateCompany(&id, &companyData)
 
 	if err != nil {
 		return nil, err
@@ -192,7 +205,13 @@ func (c *API) UpdateCompany(ctx context.Context, in *company.Company) (*company.
 // DeleteCompany delete company adat
 func (c *API) DeleteCompany(ctx context.Context, in *company.Id) (*company.Id, error) {
 	context := c.App.NewContext()
-	result, err := context.DeleteCompany(in.GetId())
+
+	id, err := primitive.ObjectIDFromHex(in.GetId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("Could not convert to ObjectId: %v", err))
+	}
+
+	result, err := context.DeleteCompany(&id)
 
 	if err != nil {
 		return nil, err
