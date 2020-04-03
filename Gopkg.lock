@@ -18,14 +18,16 @@
   version = "v1.8.0"
 
 [[projects]]
-  digest = "1:e3f60c1c88c0c63fc6566d6a7958c66a1ccf9800d334fde13d2ba26dc1a3f76b"
+  digest = "1:bec147a14de3052d270c4a418526a78f72903e796abe69946f7910d0f1025c3d"
   name = "github.com/golang/protobuf"
   packages = [
+    "jsonpb",
     "proto",
     "protoc-gen-go/descriptor",
     "ptypes",
     "ptypes/any",
     "ptypes/duration",
+    "ptypes/struct",
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
@@ -41,12 +43,16 @@
   revision = "ff6b7dc882cf4cfba7ee0b9f7dcc1ac096c554aa"
 
 [[projects]]
-  digest = "1:0826f940065fbb5eb153c882a8ae36e21c733d3e1082eef53d7b24f23d5f0ad2"
+  digest = "1:6f1b17edf32d43e0e782a4952c6b0ee64d28c2db6d3779a73a3f7ed1882762e5"
   name = "github.com/grpc-ecosystem/go-grpc-middleware"
   packages = [
     ".",
+    "logging",
+    "logging/logrus",
+    "logging/logrus/ctxlogrus",
     "ratelimit",
     "recovery",
+    "tags",
   ]
   pruneopts = "UT"
   revision = "3c51f7f332123e8be5a157c0802a228ac85bf9db"
@@ -408,13 +414,16 @@
   input-imports = [
     "github.com/golang/protobuf/ptypes",
     "github.com/grpc-ecosystem/go-grpc-middleware",
+    "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus",
     "github.com/grpc-ecosystem/go-grpc-middleware/ratelimit",
     "github.com/grpc-ecosystem/go-grpc-middleware/recovery",
+    "github.com/grpc-ecosystem/go-grpc-middleware/tags",
     "github.com/oojob/protorepo-company-go",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/spf13/viper",
+    "go.mongodb.org/mongo-driver/bson",
     "go.mongodb.org/mongo-driver/bson/primitive",
     "go.mongodb.org/mongo-driver/mongo",
     "go.mongodb.org/mongo-driver/mongo/options",
