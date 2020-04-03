@@ -8,6 +8,7 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	ratelimit "github.com/grpc-ecosystem/go-grpc-middleware/ratelimit"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/oojob/company/src/api"
 	"github.com/oojob/company/src/app"
 	company "github.com/oojob/protorepo-company-go"
@@ -66,10 +67,12 @@ func listenGRPC(api *api.API, port int) error {
 		grpc.MaxRecvMsgSize(1024*1024*128),
 		grpc_middleware.WithUnaryServerChain(
 			ratelimit.UnaryServerInterceptor(limiter),
+			grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 			grpc_recovery.UnaryServerInterceptor(recoveryOpts...),
 		),
 		grpc_middleware.WithStreamServerChain(
 			ratelimit.StreamServerInterceptor(limiter),
+			grpc_ctxtags.StreamServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 			grpc_recovery.StreamServerInterceptor(recoveryOpts...),
 		),
 	)

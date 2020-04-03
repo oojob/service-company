@@ -1,5 +1,13 @@
 -include .env
 
+ID?=1
+.DEFAULT_GOAL := help
+
+.EXPORT_ALL_VARIABLES:
+PORT?=50051
+HOST?=localhost
+CAFILE?="ca.cert"
+
 VERSION                 := $(shell git describe --tags)
 BUILD                   := $(shell git rev-parse --short HEAD)
 PROJECTNAME             := $(shell basename "$(PWD)")
@@ -35,6 +43,15 @@ dep: ## setup all dependencies
 
 build: ## Build the binary file for server
 	@go build -i -v -o $(SERVER_OUT) $(SERVER_PKG_BUILD)
+
+cert: ## Create certificates to encrypt the gRPC connection
+	openssl genrsa -out ca.key 4096
+	openssl req -new -x509 -key ca.key -sha256 -subj "/C=US/ST=NJ/O=CA, Inc." -days 365 -out ca.cert
+	openssl genrsa -out service.key 4096
+	openssl req -new -key service.key -out service.csr -config certificate.conf
+	openssl x509 -req -in service.csr -CA ca.cert -CAkey ca.key -CAcreateserial \
+		-out service.pem -days 365 -sha256 -extfile certificate.conf -extensions req_ext
+
 
 
 help:

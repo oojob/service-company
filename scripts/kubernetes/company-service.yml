@@ -1,26 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: account-deployment
+  name: company
   namespace: oojob
-  labels:
-    app: account-svc
-  creationTimestamp: null
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
-      app: account-svc
-  strategy: {}
+      app: company
   template:
     metadata:
-      creationTimestamp: null
       labels:
-        app: account-svc
+        app: company
     spec:
-      serviceAccountName: acccount-service
       containers:
-        - name: account-svc
+        - name: company
           image: docker.pkg.github.com/oojob/service-company/company:dev
           imagePullPolicy: "Never"
           resources:
@@ -33,22 +27,21 @@ spec:
             - name: DATABASEURI
               value: "mongodb+srv://oojob:oojobN9@oojob-fxap7.mongodb.net/oojob?retryWrites=true&w=majority"
             - name: PORT
-              value: 3005
-status: {}
+              value: "3005"
+      imagePullSecrets:
+        - name: regcred
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    app: account-svc
-  name: account-service
+  name: company
   namespace: oojob
 spec:
-  type: LoadBalancer
   selector:
-    app: account-svc
-  clusterIP: None
+    app: company
   ports:
-    - port: 3005
+    - name: grpc
+      port: 3005
       targetPort: 3005
-      name: grpc
+      protocol: TCP
+  clusterIP: None

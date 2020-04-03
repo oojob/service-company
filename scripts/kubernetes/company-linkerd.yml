@@ -1,21 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app: account-svc
-  name: account-deployment
+  name: company
   namespace: oojob
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
-      app: account-svc
+      app: company
   template:
     metadata:
       annotations:
         linkerd.io/inject: enabled
       labels:
-        app: account-svc
+        app: company
     spec:
       containers:
       - env:
@@ -25,29 +23,28 @@ spec:
           value: "3005"
         image: docker.pkg.github.com/oojob/service-company/company:dev
         imagePullPolicy: Never
-        name: account-svc
+        name: company
         ports:
         - containerPort: 3005
           name: grpc
         resources:
           requests:
             cpu: 100m
-      serviceAccountName: acccount-service
+      imagePullSecrets:
+      - name: regcred
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    app: account-svc
-  name: account-service
+  name: company
   namespace: oojob
 spec:
-  type: LoadBalancer
   selector:
-    app: account-svc
-  clusterIP: None
+    app: company
   ports:
-    - port: 3005
+    - name: grpc
+      port: 3005
       targetPort: 3005
-      name: grpc
+      protocol: TCP
+  clusterIP: None
 ---
