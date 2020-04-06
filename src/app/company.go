@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/oojob/company/src/model"
+	"github.com/oojob/service-company/src/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 
-	"github.com/oojob/company/src/db"
+	"github.com/oojob/service-company/src/db"
 	"github.com/sirupsen/logrus"
 )
 

@@ -9,7 +9,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 
-	"github.com/oojob/company/src/model"
+	"github.com/oojob/service-company/src/model"
 	company "github.com/oojob/protorepo-company-go"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"

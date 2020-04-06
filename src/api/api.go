@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/oojob/company/src/app"
+	"github.com/oojob/service-company/src/app"
 )
 
 // API api base struct
