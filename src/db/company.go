@@ -13,19 +13,32 @@ import (
 
 // CreateCompany create company entity
 func (db *Database) CreateCompany(in *model.Company) (string, error) {
-	companyCollection := db.Database("stayology").Collection("company")
+	var inerstionID string
+	oojob := db.Database("stayology")
+	client := oojob.Client()
+	companyCollection := oojob.Collection("company")
 
-	result, err := companyCollection.InsertOne(context.Background(), in)
-
+	// start the session
+	session, err := client.StartSession()
 	if err != nil {
 		return "", err
 	}
+	defer session.EndSession(context.Background())
 
-	if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
-		return oid.Hex(), nil
-	}
+	_, err = session.WithTransaction(context.Background(), func(sessionContext mongo.SessionContext) (interface{}, error) {
+		result, err := companyCollection.InsertOne(sessionContext, in)
+		if err != nil {
+			return "", err
+		}
 
-	return "", err
+		if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
+			inerstionID = oid.Hex()
+		}
+
+		return "", nil
+	})
+
+	return inerstionID, err
 }
 
 // ReadCompany create company entity
