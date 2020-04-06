@@ -42,6 +42,7 @@ func (db *Database) CreateCompany(in *model.Company) (string, error) {
 }
 
 // ReadCompany create company entity
+// should be modified by dibya
 func (db *Database) ReadCompany(id *primitive.ObjectID) (*model.Company, error) {
 	companyCollection := db.Database("stayology").Collection("company")
 
