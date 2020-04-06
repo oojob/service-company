@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/oojob/company/src/model"
+	"github.com/oojob/service-company/src/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
