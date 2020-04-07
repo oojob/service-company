@@ -19,7 +19,11 @@
 export GOPATH="/Users/<user>/<folder>/go"
 export PATH=$PATH:$GOPATH/bin
 ```
+> ### Use `gitflow` for project management
+* [gitflow docs](https://www.atlassian.com/git/tutorials/comparing-workflows/)
+* [gitflow cheatsheet](https://danielkummer.github.io/git-flow-cheatsheet/)
 
+gitflow-workflow
 > ### IMPORTANT! Make sure this repository is located or clone the project
 ```bash
 # clone the project
@@ -60,4 +64,36 @@ make build
 > company service is build as an command line application.
 > After running `make build` run `./bin/server --help` to view available commands
 ```bash
-company service is responsible for CRUD with company entity
+Usage:
+  company [OPTIONS] [COMMANDS] [flags]
+  company [command]
+
+Available Commands:
+  help        Help about any command
+  serve       serves the gRPC server
+  version     Print the version number
+
+Flags:
+  -a, --author string   author name for copyright attribution (
+default "nirajgeorgian")
+      --config string   config file (default is config.yaml)
+  -h, --help            help for company
+      --viper           use Viper for configuration (default tr
+ue)
+
+Use "company [command] --help" for more information about a com
+mand.
+
+# create a company
+grpc_cli call localhost:3000 CreateCompany "name: 'lorem',description: 'ipsum', no_of_employees: {min: 3, max: 4}"
+
+# update a company
+grpc_cli call localhost:30000 UpdateCompany "name: 'updated name',id: '5e85b903dd1dca85d6e1f8bd',no_of_employees: {min: 3, max: 4}"
+
+# read a company by id
+grpc_cli call localhost:3000 ReadCompany "id: '5e84efd6fbe77f66ced36613'"
+
+# read all companies as stream data
+grpc_cli call localhost:3000 ReadCompanies ""
+
+```
