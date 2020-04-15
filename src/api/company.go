@@ -9,8 +9,8 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 
-	"github.com/oojob/service-company/src/model"
 	company "github.com/oojob/protorepo-company-go"
+	"github.com/oojob/service-company/src/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -218,4 +218,60 @@ func (c *API) DeleteCompany(ctx context.Context, in *company.Id) (*company.Id, e
 	}
 
 	return &company.Id{Id: result}, nil
+}
+
+// ReadAllCompanies data
+func (c *API) ReadAllCompanies(ctx context.Context, in *company.Pagination) (*company.CompanyAllResponse, error) {
+	context := c.App.NewContext()
+	limit := in.GetLimit()
+	skip := in.GetSkip()
+
+	response, error := context.ReadAllCompanies(skip, limit)
+	if error != nil {
+		return nil, error
+	}
+
+	var companies []*company.Company
+	for _, result := range *response {
+		createdAt, err := ptypes.TimestampProto(result.CreatedAt)
+		if err != nil {
+			return nil, status.Errorf(codes.Unavailable, fmt.Sprintf("Could not decode data: %v", err))
+		}
+
+		updatedAt, err := ptypes.TimestampProto(result.UpdatedAt)
+		if err != nil {
+			return nil, status.Errorf(codes.Unavailable, fmt.Sprintf("Could not decode data: %v", err))
+		}
+
+		lastActive, err := ptypes.TimestampProto(result.LastActive)
+		if err != nil {
+			return nil, status.Errorf(codes.Unavailable, fmt.Sprintf("Could not decode data: %v", err))
+		}
+
+		company := &company.Company{
+			Id:           result.ID.Hex(),
+			Name:         result.Name,
+			Description:  result.Description,
+			CreatedBy:    result.CreatedBy,
+			Url:          result.URL,
+			Logo:         result.Logo,
+			Location:     result.Location,
+			FoundedYear:  result.FoundedYear,
+			HiringStatus: result.HiringStatus,
+			Skills:       result.Skills,
+			NoOfEmployees: &company.Range{
+				Min: result.NoOfEmployees.Min,
+				Max: result.NoOfEmployees.Max,
+			},
+			LastActive: lastActive,
+			CreatedAt:  createdAt,
+			UpdatedAt:  updatedAt,
+		}
+
+		companies = append(companies, company)
+	}
+
+	return &company.CompanyAllResponse{
+		Companies: companies,
+	}, nil
 }

@@ -18,16 +18,14 @@
   version = "v1.8.0"
 
 [[projects]]
-  digest = "1:bec147a14de3052d270c4a418526a78f72903e796abe69946f7910d0f1025c3d"
+  digest = "1:e3f60c1c88c0c63fc6566d6a7958c66a1ccf9800d334fde13d2ba26dc1a3f76b"
   name = "github.com/golang/protobuf"
   packages = [
-    "jsonpb",
     "proto",
     "protoc-gen-go/descriptor",
     "ptypes",
     "ptypes/any",
     "ptypes/duration",
-    "ptypes/struct",
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
@@ -43,13 +41,10 @@
   revision = "ff6b7dc882cf4cfba7ee0b9f7dcc1ac096c554aa"
 
 [[projects]]
-  digest = "1:6f1b17edf32d43e0e782a4952c6b0ee64d28c2db6d3779a73a3f7ed1882762e5"
+  digest = "1:8a101a1b2f82527a62f138d0c295957ca0856ed346aabf65e58a585e6c01093b"
   name = "github.com/grpc-ecosystem/go-grpc-middleware"
   packages = [
     ".",
-    "logging",
-    "logging/logrus",
-    "logging/logrus/ctxlogrus",
     "ratelimit",
     "recovery",
     "tags",
@@ -125,11 +120,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a0a215e3969e323d5cd12351c743db5a3fe115406bdde006ba129d7ea199cf1f"
+  digest = "1:3d1034daa8a464659614c3cb89325a0f4b54e48716b9c8f77ba6ccc5895c7590"
   name = "github.com/oojob/protorepo-company-go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e779e032c850d18d857316f49722d3d1ebf7fae9"
+  revision = "e8af35320d77390d56bb5bd22533f5e5c8235ebb"
 
 [[projects]]
   digest = "1:6eea828983c70075ca297bb915ffbcfd3e34c5a50affd94428a65df955c0ff9c"
@@ -414,7 +409,6 @@
   input-imports = [
     "github.com/golang/protobuf/ptypes",
     "github.com/grpc-ecosystem/go-grpc-middleware",
-    "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus",
     "github.com/grpc-ecosystem/go-grpc-middleware/ratelimit",
     "github.com/grpc-ecosystem/go-grpc-middleware/recovery",
     "github.com/grpc-ecosystem/go-grpc-middleware/tags",
@@ -427,6 +421,7 @@
     "go.mongodb.org/mongo-driver/bson/primitive",
     "go.mongodb.org/mongo-driver/mongo",
     "go.mongodb.org/mongo-driver/mongo/options",
+    "go.mongodb.org/mongo-driver/mongo/readpref",
     "google.golang.org/grpc",
     "google.golang.org/grpc/codes",
     "google.golang.org/grpc/encoding/gzip",
