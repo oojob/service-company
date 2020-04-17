@@ -120,11 +120,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3d1034daa8a464659614c3cb89325a0f4b54e48716b9c8f77ba6ccc5895c7590"
+  digest = "1:73e071faa9c9c35036cd1025ff455fec02644cff9ad86ecfc3874639e8970dba"
   name = "github.com/oojob/protorepo-company-go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e8af35320d77390d56bb5bd22533f5e5c8235ebb"
+  revision = "9c927347c493d916d92fce4bcf9ce920e5fe6990"
 
 [[projects]]
   digest = "1:6eea828983c70075ca297bb915ffbcfd3e34c5a50affd94428a65df955c0ff9c"

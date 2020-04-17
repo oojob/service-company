@@ -275,3 +275,19 @@ func (c *API) ReadAllCompanies(ctx context.Context, in *company.Pagination) (*co
 		Companies: companies,
 	}, nil
 }
+
+// Check check the context
+func (c *API) Check(ctx context.Context, in *company.HealthCheckRequest) (*company.HealthCheckResponse, error) {
+	return &company.HealthCheckResponse{
+		Status: company.HealthCheckResponse_SERVING,
+	}, nil
+}
+
+// Watch watch the serving status
+func (c *API) Watch(_ *company.HealthCheckRequest, stream company.CompanyService_WatchServer) error {
+	stream.Send(&company.HealthCheckResponse{
+		Status: company.HealthCheckResponse_SERVING,
+	})
+
+	return nil
+}
