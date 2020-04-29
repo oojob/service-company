@@ -42,35 +42,79 @@ func (db *Database) CreateCompany(in *model.Company) (string, error) {
 }
 
 // ReadCompany create company entity
-// should be modified by dibya
+// modified by dibya
 func (db *Database) ReadCompany(id *primitive.ObjectID) (*model.Company, error) {
 	companyCollection := db.Database("stayology").Collection("company")
 
 	var company model.Company
+	
+
+	// start the session
+	session, err := client.StartSession()
+	if err != nil {
+		return "", err
+	}
+	defer session.EndSession(context.Background())
+
+	_, err = session.WithTransaction(context.Background(), func(sessionContext mongo.SessionContext) (interface{}, error) {
+		
 	result := companyCollection.FindOne(context.Background(), &bson.M{"_id": id})
 	if err := result.Decode(&company); err != nil {
 		return nil, err
 	}
-
+			
+	// decode and write to C O M P A N Y?
+	if err := result.Decode(&company); err != nil {
+		return nil, err
+	}
+	}
 	return &company, nil
+	
 }
 
 // ReadCompanies create company entity
 func (db *Database) ReadCompanies() (*mongo.Cursor, error) {
 	companyCollection := db.Database("stayology").Collection("company")
 
-	cursor, err := companyCollection.Find(context.Background(), bson.M{})
-	if err != nil {
-		return nil, err
-	}
 
-	return cursor, nil
+	// start the session
+	session, err := client.StartSession()
+	if err != nil {
+		return "", err
+	}
+	defer session.EndSession(context.Background())
+	_, err = session.WithTransaction(context.Background(), func(sessionContext mongo.SessionContext) (interface{}, error) {
+ 
+
+		cursor, err := companyCollection.Find(context.Background(), bson.M{})
+		if err != nil {
+			return nil, err
+		}
+
+		/*IS THIS DEFER REQUIRED*/
+		defer cursor.Close(context.Background())
+
+		if err := cursor.Err(); err != nil {
+			return "", err
+		}
+		/*  */
+	}
+		return cursor, nil
 }
 
 // UpdateCompany create company entity
 func (db *Database) UpdateCompany(id *primitive.ObjectID, in *bson.M) (string, error) {
 	companyCollection := db.Database("stayology").Collection("company")
 
+	// start the session
+	session, err := client.StartSession()
+	if err != nil {
+		return "", err
+	}
+	defer session.EndSession(context.Background())
+	
+	_, err = session.WithTransaction(context.Background(), func(sessionContext mongo.SessionContext) (interface{}, error) {
+ 
 	result := companyCollection.FindOneAndUpdate(context.Background(), bson.M{"_id": id}, bson.M{"$set": in}, options.FindOneAndUpdate().SetReturnDocument(1))
 
 	if result.Err() != nil {
@@ -81,7 +125,7 @@ func (db *Database) UpdateCompany(id *primitive.ObjectID, in *bson.M) (string, e
 	if err := result.Decode(&doc); err != nil {
 		return "", err
 	}
-
+	}
 	return doc.ID.Hex(), nil
 }
 
@@ -89,11 +133,22 @@ func (db *Database) UpdateCompany(id *primitive.ObjectID, in *bson.M) (string, e
 func (db *Database) DeleteCompany(id *primitive.ObjectID) (string, error) {
 	companyCollection := db.Database("stayology").Collection("company")
 
-	var company model.Company
-	result := companyCollection.FindOneAndDelete(context.Background(), bson.M{"_id": id})
-	if err := result.Decode(&company); err != nil {
+
+	// start the session
+	session, err := client.StartSession()
+	if err != nil {
 		return "", err
 	}
+	defer session.EndSession(context.Background())
 
+	_, err = session.WithTransaction(context.Background(), func(sessionContext mongo.SessionContext) (interface{}, error) {
+		
+		var company model.Company
+		result := companyCollection.FindOneAndDelete(context.Background(), bson.M{"_id": id})
+		if err := result.Decode(&company); err != nil {
+		return "", err
+	}
+	}
+	
 	return company.ID.Hex(), nil
 }
