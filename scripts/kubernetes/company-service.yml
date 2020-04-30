@@ -1,8 +1,23 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: oojob
+  annotations:
+    linkerd.io/inject: enabled
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: build-oojob
+  namespace: oojob
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: company
   namespace: oojob
+  labels:
+    app: company
 spec:
   replicas: 3
   selector:
@@ -34,6 +49,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  labels:
+    app: company
   name: company
   namespace: oojob
 spec:
@@ -45,3 +62,21 @@ spec:
       targetPort: 3005
       protocol: TCP
   clusterIP: None
+  # type: LoadBalancer
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: company
+  namespace: oojob
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    ingress.kubernetes.io/custom-request-headers: l5d-dst-override:web-svc.company.svc.cluster.local:3005
+spec:
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - backend:
+              serviceName: company
+              servicePort: 3005

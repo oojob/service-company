@@ -31,3 +31,8 @@ func (ctx *Context) UpdateCompany(id *primitive.ObjectID, company *bson.M) (stri
 func (ctx *Context) DeleteCompany(id *primitive.ObjectID) (string, error) {
 	return ctx.Database.DeleteCompany(id)
 }
+
+// ReadAllCompanies creates a company
+func (ctx *Context) ReadAllCompanies(skip string, limit int64) (*[]*model.Company, error) {
+	return ctx.Database.ReadAllCompanies(skip, limit)
+}

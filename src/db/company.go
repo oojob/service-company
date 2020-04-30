@@ -152,3 +152,40 @@ func (db *Database) DeleteCompany(id *primitive.ObjectID) (string, error) {
 	
 	return company.ID.Hex(), nil
 }
+
+// ReadAllCompanies read all company entities
+func (db *Database) ReadAllCompanies(skip string, limit int64) (*[]*model.Company, error) {
+	companyCollection := db.Database("stayology").Collection("company")
+
+	// Pass these options to the Find method
+	findOptions := options.Find()
+	findOptions.SetLimit(limit)
+
+	// store all companies result
+	var companies []*model.Company
+
+	cursor, err := companyCollection.Find(context.Background(), bson.D{}, findOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(context.Background())
+	for cursor.Next(context.Background()) {
+		// create an empty value to hold single decoded company value
+		var company model.Company
+		if err := cursor.Decode(&company); err != nil {
+			return nil, err
+		}
+		// To get the raw bson bytes use cursor.Current
+		// raw := cursor.Current
+		companies = append(companies, &company)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	// Close the cursor once finished
+	cursor.Close(context.TODO())
+	return &companies, nil
+}
